@@ -1,0 +1,26 @@
+{
+  "name": "@example/css",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "",
+  "scripts": {
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf dist && postcss ./src/*.css --base . --dir ./dist"
+  },
+  "dependencies": {
+    "@digdir/designsystemet-css": "^1.15.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "10.5.0",
+    "cssnano": "8.0.2",
+    "postcss": "8.5.15",
+    "postcss-cli": "11.0.1",
+    "postcss-import": "16.1.1",
+    "postcss-nesting": "14.0.0",
+    "rimraf": "6.1.3"
+  }
+}

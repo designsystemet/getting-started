@@ -1,0 +1,27 @@
+{
+  "name": "getting-started",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "workspaces": [
+    "examples/*"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build && npm --workspace examples/css-modules run build  && npm --workspace examples/css run build ",
+    "css": "npm --workspace examples/css run dev",
+    "preview": "vite preview",
+    "tokens": "designsystemet tokens create --clean && designsystemet tokens build --clean --experimental-tailwind"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.0",
+    "@types/node": "^25.9.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.12"
+  },
+  "dependencies": {
+    "@digdir/designsystemet": "^0.0.0-feat-remove-color-categories-20260616084032",
+    "@digdir/designsystemet-css": "^0.0.0-feat-remove-color-categories-20260616084032",
+    "@digdir/designsystemet-web": "^0.0.0-feat-remove-color-categories-20260616084032"
+  }
+}
