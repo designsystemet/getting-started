@@ -63,23 +63,58 @@ function postcssComposes() {
 						},
 					);
 
-				cache[resolvedFrom].root.walkRules((fromRule) => {
-					if (fromRule.selector.split(/:|\s/)[0] === `.${selector}`) {
-						const newSelector = fromRule.selector.replace(`.${selector}`, "&");
+				// Match `.${selector}` as a complete class name, i.e. only when it is
+				// not immediately followed by another class-name character (`\w` or
+				// `-`). This matches `.ds-button`, `.ds-button:hover`,
+				// `.ds-button[data-x]`, `.ds-button .child` and every selector in a
+				// comma-separated group, while excluding unrelated classes such as
+				// `.ds-button-large`.
+				const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+				const selectorPattern = new RegExp(`\\.${escaped}(?![\\w-])`, "g");
 
-						// When the source rule's selector is exactly `.${selector}` (no
-						// trailing pseudo-classes/elements), inline its children directly
-						// into the parent of `@composes` instead of wrapping them in a
-						// `& { ... }` rule. This makes `@composes` work inside
-						// pseudo-elements (e.g. `::before`), where postcss-nesting would
-						// otherwise produce an invalid `:is(...::before)` selector.
-						if (newSelector === "&") {
-							rule.replaceWith(fromRule.nodes.map((node) => node.clone()));
-						} else {
-							rule.replaceWith(fromRule.clone({ selector: newSelector }));
-						}
+				// Collect every replacement node first, then swap `@composes` for all
+				// of them in a single `replaceWith`. Calling `replaceWith` per match
+				// would only work for the first one: it detaches `@composes` from the
+				// tree, so any later call becomes a silent no-op.
+				const replacements = [];
+
+				cache[resolvedFrom].root.walkRules((fromRule) => {
+					selectorPattern.lastIndex = 0;
+					if (!selectorPattern.test(fromRule.selector)) return;
+
+					// Replace every occurrence of `.${selector}` (a comma-separated
+					// group may contain several) with the nesting selector `&`.
+					const newSelector = fromRule.selector.replace(selectorPattern, "&");
+
+					// When the source rule's selector is exactly `.${selector}` (no
+					// trailing pseudo-classes/elements), inline its children directly
+					// into the parent of `@composes` instead of wrapping them in a
+					// `& { ... }` rule. This makes `@composes` work inside
+					// pseudo-elements (e.g. `::before`), where postcss-nesting would
+					// otherwise produce an invalid `:is(...::before)` selector.
+					if (newSelector === "&") {
+						for (const node of fromRule.nodes) replacements.push(node.clone());
+						return;
+					}
+
+					const rewritten = fromRule.clone({ selector: newSelector });
+
+					// Preserve the at-rule context of nested rules (e.g. a rule inside
+					// `@media (hover: hover)`) by re-wrapping the rewritten rule in a
+					// clone of its parent at-rule. Without this the rule would be
+					// hoisted out of its `@media`/`@supports` block.
+					const { parent } = fromRule;
+					if (parent && parent.type === "atrule") {
+						const wrapper = parent.clone();
+						wrapper.removeAll();
+						wrapper.append(rewritten);
+						replacements.push(wrapper);
+					} else {
+						replacements.push(rewritten);
 					}
 				});
+
+				rule.replaceWith(...replacements);
 			},
 		},
 	};
