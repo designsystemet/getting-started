@@ -1,7 +1,6 @@
 .button {
   composes: ds-button from '@digdir/designsystemet-css';
 
-
   font-size: 1.5em;
   box-shadow: -4px 4px var(--ds-color-neutral-base-contrast-subtle);
 }

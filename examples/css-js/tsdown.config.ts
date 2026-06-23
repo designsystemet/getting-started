@@ -20,7 +20,7 @@ export default defineConfig({
   css: {
     // Set to `true` to ship pre-minified CSS; left readable so consumers can
     // minify as part of their own pipeline.
-    minify: true,
+    minify: false,
     modules: {
       // Scoped class pattern (Lightning CSS tokens). `[local]` keeps the
       // authored name for debugging; `[hash]` guarantees uniqueness across the

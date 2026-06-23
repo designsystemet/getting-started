@@ -27,10 +27,10 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch",
+    "watch": "tsdown --watch",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build",
-    "play": "vite"
+    "dev": "vite"
   },
   "peerDependencies": {
     "@digdir/designsystemet-css": ">=1.15.0",

@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm --workspace examples/css-js run build  && npm --workspace examples/css run build ",
     "css": "npm --workspace examples/css run dev",
-    "css-js": "npm --workspace examples/css-js run play",
+    "css-js": "npm --workspace examples/css-js run dev",
     "tokens": "designsystemet tokens create --clean && designsystemet tokens build --clean --experimental-tailwind"
   },
   "devDependencies": {
