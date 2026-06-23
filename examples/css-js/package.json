@@ -1,0 +1,62 @@
+{
+  "name": "@example/css-js",
+  "version": "0.0.0",
+  "description": "A CSS Modules and JavaScript component library, bundled with tsdown (rolldown).",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.js",
+    "./package.json": "./package.json",
+    "./style.css": "./dist/style.css"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build",
+    "play": "vite"
+  },
+  "peerDependencies": {
+    "@digdir/designsystemet-css": ">=1.15.0",
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@digdir/designsystemet-css": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@digdir/designsystemet-css": "^1.16.0",
+    "@tsconfig/strictest": "^2.0.8",
+    "@types/node": "^25.6.2",
+    "@tsdown/css": "^0.22.3",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "tsdown": "^0.22.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.0.16",
+    "vitest": "^4.1.5",
+    "vitest-browser-react": "^2.2.0",
+    "@vitest/browser-playwright": "^4.1.5"
+  }
+}

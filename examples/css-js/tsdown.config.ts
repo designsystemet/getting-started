@@ -10,6 +10,8 @@ export default defineConfig({
   format: ["esm"],
   dts: true,
   clean: true,
+  platform: "neutral",
+  exports: true,
 
   // `@tsdown/css` (powered by rolldown + Lightning CSS) handles every imported
   // `*.css` file. `.module.css` files are compiled as CSS Modules: class names
