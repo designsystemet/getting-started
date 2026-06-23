@@ -1,6 +1,6 @@
 .my-button {
     /* biome-ignore lint/suspicious/noUnknownAtRules: @composes */
-    @composes ds-button from "@digdir/designsystemet-css/button.css";
+    @composes ds-button from "@digdir/designsystemet-css";
 
     font-size: 1.5em;
     box-shadow: -4px 4px var(--ds-color-neutral-base-contrast-subtle);

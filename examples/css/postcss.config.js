@@ -78,6 +78,11 @@ function postcssComposes() {
 				// tree, so any later call becomes a silent no-op.
 				const replacements = [];
 
+				// Track emitted `@layer` blocks by their layer name so every source
+				// rule from the same cascade layer is collected into a single
+				// `@layer ds.components { ... }` block instead of one block per rule.
+				const layersByName = new Map();
+
 				cache[resolvedFrom].root.walkRules((fromRule) => {
 					selectorPattern.lastIndex = 0;
 					if (!selectorPattern.test(fromRule.selector)) return;
@@ -92,25 +97,44 @@ function postcssComposes() {
 					// `& { ... }` rule. This makes `@composes` work inside
 					// pseudo-elements (e.g. `::before`), where postcss-nesting would
 					// otherwise produce an invalid `:is(...::before)` selector.
-					if (newSelector === "&") {
-						for (const node of fromRule.nodes) replacements.push(node.clone());
-						return;
-					}
+					let nodes =
+						newSelector === "&"
+							? fromRule.nodes.map((node) => node.clone())
+							: [fromRule.clone({ selector: newSelector })];
 
-					const rewritten = fromRule.clone({ selector: newSelector });
-
-					// Preserve the at-rule context of nested rules (e.g. a rule inside
-					// `@media (hover: hover)`) by re-wrapping the rewritten rule in a
-					// clone of its parent at-rule. Without this the rule would be
-					// hoisted out of its `@media`/`@supports` block.
-					const { parent } = fromRule;
-					if (parent && parent.type === "atrule") {
+					// Preserve the at-rule context of the source rule by re-wrapping
+					// the result in clones of its ancestor at-rules, from the innermost
+					// outward. This keeps the composed declarations in the same cascade
+					// layer (`@layer ds.components`) and conditional context
+					// (`@media`/`@supports`) they had in the source file — including
+					// nested chains such as `@layer ds.components { @media ... }`.
+					// Without this the rule would be hoisted out of its enclosing
+					// `@layer`/`@media`/`@supports` block.
+					for (
+						let parent = fromRule.parent;
+						parent && parent.type === "atrule";
+						parent = parent.parent
+					) {
 						const wrapper = parent.clone();
 						wrapper.removeAll();
-						wrapper.append(rewritten);
-						replacements.push(wrapper);
-					} else {
-						replacements.push(rewritten);
+						wrapper.append(...nodes);
+						nodes = [wrapper];
+					}
+
+					// Merge into an already-emitted `@layer` block of the same name so
+					// the output keeps a single block per cascade layer. The first
+					// rule from a layer establishes the block (kept at its source
+					// position); later rules append their content into it.
+					for (const node of nodes) {
+						if (node.type === "atrule" && node.name === "layer") {
+							const existing = layersByName.get(node.params);
+							if (existing) {
+								existing.append(...node.nodes);
+								continue;
+							}
+							layersByName.set(node.params, node);
+						}
+						replacements.push(node);
 					}
 				});
 
